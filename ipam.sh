@@ -14,12 +14,9 @@ usage() {
 	echo -e ${CYAN}
   echo -e "usage: $(basename $0) [option]"
 	echo
-	printf "server-gost       Create Server side tunnel as gost\n"
-  printf "local-gost        Create local Side  tunnel as gost\n"
-  printf "v2rayCreate       v2ray account\n"
-	printf "show \$1         show\n"
-	printf "revoke-conf       revoke account\n"
-  printf "help              show this help\n"
+	printf "show             show\n"
+	printf "insert           insert new ip\n"
+  printf "help             show this help\n"
 	printf ${CLEAR}
 }
 
@@ -29,6 +26,18 @@ counOfKeys=`cat ipam.json| jq -r 'keys[]' | wc -l`
 if [ -z $2 ]
 then
   echo "var is unset"
+
+        counter=0
+        count=`cat ipam.json| jq  -r --arg  name "$2" '(.[$name]) | length '`
+        #echo $count
+        while [ $counter -le $count ]
+        do
+          #echo "Welcome $counter times"
+          #cat daria.json| jq -r --arg  id "$counter" '([.daria[$id|tonumber] | .ipaddr , .dec]) | @tsv' ;
+          cat ipam.json| jq -r --arg  id "$counter"  '([.[][$id|tonumber] | .id , .ipaddr , .dec ]) | @tsv' ;
+          counter=$(( $counter + 1 ))
+        done
+        break
 else
   counterOfKey=0
   while [ $counterOfKey -le $counOfKeys ]
@@ -50,7 +59,7 @@ else
           cat ipam.json| jq -r --arg  id "$counter"  --arg  name "$2" '([.[$name][$id|tonumber] | .id , .ipaddr , .dec ]) | @tsv' ;
           counter=$(( $counter + 1 ))
         done
-       break
+        break
     elif [ $counterOfKey == $counOfKeys ]
     then
       echo "arg number two not available"
