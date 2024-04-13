@@ -16,6 +16,6 @@ if database file (ipam.db) is not available that create ipam.db file
 
 # example image
 
-<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image1.png" width=300>
-<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image2.png" width=300>
-<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image3.png" width=300>
+<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image1.png" width=700>
+<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image2.png" width=700>
+<img src="https://raw.githubusercontent.com/hoseinmontazer/ipam/main/image/image3.png" width=700>
