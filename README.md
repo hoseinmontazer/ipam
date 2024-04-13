@@ -1,4 +1,4 @@
-# v2ray-shadowsock-over-gost
+# ipam (IP address management)
 This script manage ip as ipam app with bash script and sqlite
 
 ## install
