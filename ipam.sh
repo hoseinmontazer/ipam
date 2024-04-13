@@ -14,86 +14,111 @@ usage() {
 	echo -e ${CYAN}
   echo -e "usage: $(basename $0) [option]"
 	echo
+  printf "init             init db\n"
 	printf "show             show\n"
 	printf "insert           insert new ip\n"
+  printf "del              delete  ip\n"
   printf "help             show this help\n"
 	printf ${CLEAR}
 }
 
 
+
+
+init() {
+  echo -e ${YELLOW}
+  echo "start create database"
+  sleep 3
+  
+  
+  if [ -f ipam.db ]
+  then
+    echo "database is exists"
+    
+  else
+    sqlite3 ipam.db "create table ipam (id INTEGER PRIMARY KEY , host TEXT, ip INTEGER , dec TEXT);"
+    echo "created database"
+  fi
+  printf ${CLEAR}
+}
+
+
+
+
 show() {
-counOfKeys=`cat ipam.json| jq -r 'keys[]' | wc -l`
 if [ -z $2 ]
 then
-  echo "var is unset"
+  echo -e '\n\n'
+  sqlite3 ipam.db ".mode column" "select * from ipam;"
 
-        counter=0
-        count=`cat ipam.json| jq  -r --arg  name "$2" '(.[$name]) | length '`
-        #echo $count
-        while [ $counter -le $count ]
-        do
-          #echo "Welcome $counter times"
-          #cat daria.json| jq -r --arg  id "$counter" '([.daria[$id|tonumber] | .ipaddr , .dec]) | @tsv' ;
-          cat ipam.json| jq -r --arg  id "$counter"  '([.[][$id|tonumber] | .id , .ipaddr , .dec ]) | @tsv' ;
-          counter=$(( $counter + 1 ))
-        done
-        break
 else
-  counterOfKey=0
-  while [ $counterOfKey -le $counOfKeys ]
-  #while [ $2 != `cat ipam.json| jq -r --arg  id "$counterOfKey" 'keys[$id|tonumber]'` ]
-  do
-    #echo "hi eeee"
-    if [ $2 == `cat ipam.json| jq -r --arg  id "$counterOfKey" 'keys[$id|tonumber]'` ]
-    then
-        #echo "arg number two available"
-
-        #echo "hiii"
-        counter=0
-        count=`cat ipam.json| jq  -r --arg  name "$2" '(.[$name]) | length '`
-        #echo $count
-        while [ $counter -le $count ]
-        do
-          #echo "Welcome $counter times"
-          #cat daria.json| jq -r --arg  id "$counter" '([.daria[$id|tonumber] | .ipaddr , .dec]) | @tsv' ;
-          cat ipam.json| jq -r --arg  id "$counter"  --arg  name "$2" '([.[$name][$id|tonumber] | .id , .ipaddr , .dec ]) | @tsv' ;
-          counter=$(( $counter + 1 ))
-        done
-        break
-    elif [ $counterOfKey == $counOfKeys ]
-    then
-      echo "arg number two not available"
-      break
-      #cat ipam.json| jq -r 'keys[]' | wc -l
-      #counterOfKey=$(( $counterOfKey + 1 ))
-    else
-      counterOfKey=$(( $counterOfKey + 1 ))
-    fi
-
-
-  done
-  #echo "arg number two not available"
+  echo $2
+  sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
 fi
+
 }
 
 
 
 insert() {
-  #echo "hello insert"
-  read -p 'IP: ' userIp
-  read -p 'Descrption: ' userDec
-  echo "you add $userIp $userDec $2 "
-  lastId=`cat ipam.json| jq  -r --arg  name "daria" '.[$name][-1].id'`
-  y=$((lastId++))
-  echo "aaaaaaaaa" $lastId
-  #jq -r --arg  index "$lastId"  --arg  userip "$userIp"  --arg  userdec "$userDec"  --arg  userid "$lastId" '.daria[$index|tonumber] += {"id" : $userid|tonumber , "ipaddr" : $userip , "dec": $userdec }' ipam.json  > ipam.json.tmp
-  jq -r --arg  index "$lastId"  --arg  userip "$userIp"  --arg  userdec "$userDec"  --arg  userid "$lastId" --arg  name "$2" '(.[$name][$index|tonumber]) += {"id" : $userid|tonumber , "ipaddr" : $userip , "dec": $userdec }' ipam.json  > ipam.json.tmp
-  mv ipam.json.tmp ipam.json
 
+if [ -z $2 ]
+then
+  echo -e '\n\n'
+  echo -e ${RED}
+  echo "please add your host name"
+  echo -e ${CLEAR}
+
+else
+  read -p 'IP: ' userIp
+  #sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1"
+  if [ $(sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1") == $userIp ]
+  then
+    echo -e '\n\n'
+    echo -e ${RED}
+    echo "The entred ip is duplicate"
+    echo -e ${CLEAR}
+  else
+    read -p 'Descrption: ' userDec
+    sqlite3 ipam.db  "insert into ipam (host , ip , dec) values ('$2','$userIp','$userDec'); ";
+    echo -e '\n\n'
+    echo -e ${GREEN}
+    echo "Your ip added in database"
+    printf ${CLEAR}
+  fi
+fi
 }
 
 
+del() {
 
+if [ -z $2 ]
+then
+  echo "please add your host name"
+
+else
+  read -p 'ID NUMBER: ' IPID
+  echo -e ${RED}
+  echo
+  sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' AND id='$IPID' "
+  echo
+  read -p 'Are you sure? y or n: ' CONFIRM
+  echo
+  if [[ $CONFIRM == 'y'  ]]
+  then
+    echo -e ${CLEAR}
+    sqlite3 ipam.db  "DELETE FROM ipam WHERE id LIKE '%$IPID%'; ";
+    echo -e ${GREEN}
+    echo "Your ip deleted from database."
+    printf ${CLEAR}
+
+  else
+    echo -e ${CLEAR}
+    sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
+  fi
+  
+fi
+}
 
 
 
@@ -114,28 +139,6 @@ fi
 
 p1=$1
 p2=$2
-# case $1 in
-#     "show")
-#       show
-#     ;;
-#     "server-gost")
-#     server-gost
-#         ;;
-#     "local-gost")
-#     local-gost
-#         ;;
-#     "revoke-conf")
-#     revoke-conf
-#         ;;
-#     "v2ray")
-#     v2ray
-#         ;;
-#     "help")
-#         usage
-#         break
-#         ;;
-#     *) echo "invalid option";;
-# esac
 
 case $1 in
     "show" )
@@ -143,4 +146,10 @@ case $1 in
     ;;
     "insert" )
     insert $1 $2
+    ;;
+    "init" )
+    init $1 $2
+    ;;
+    "del" )
+    del $1 $2
 esac
