@@ -10,6 +10,9 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 CLEAR='\033[0m'
 
+MAIN_DIR=~/.ipam
+
+
 usage() {
 	echo -e ${CYAN}
   echo -e "usage: $(basename $0) [option]"
@@ -28,18 +31,24 @@ usage() {
 init() {
   echo -e ${YELLOW}
   echo "start create database"
+  #echo ~
   sleep 3
-  
-  
-  if [ -f ipam.db ]
+
+
+  if [ ! -d $MAIN_DIR ]
   then
-    echo "database is exists"
-    
+    mkdir $MAIN_DIR
   else
-    sqlite3 ipam.db "create table ipam (id INTEGER PRIMARY KEY , host TEXT, ip INTEGER , dec TEXT);"
-    echo "created database"
+    if [ -f $MAIN_DIR/ipam.db ]
+    then
+      echo "database is exists"
+      
+    else
+      sqlite3 $MAIN_DIR/ipam.db "create table ipam (id INTEGER PRIMARY KEY , host TEXT, ip INTEGER , dec TEXT);"
+      echo "created database"
+    fi
+    printf ${CLEAR}
   fi
-  printf ${CLEAR}
 }
 
 
@@ -49,10 +58,10 @@ show() {
 if [ -z $2 ]
 then
   echo -e '\n\n'
-  sqlite3 ipam.db ".mode column" "select * from ipam;"
+  sqlite3 $MAIN_DIR/ipam.db ".mode column" "select * from ipam;"
 
 else
-  sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
+  sqlite3 $MAIN_DIR/ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
 fi
 
 }
@@ -71,7 +80,7 @@ then
 else
   read -p 'IP: ' userIp
   #sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1"
-  if [[ $(sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1") == $userIp ]]
+  if [[ $(sqlite3 $MAIN_DIR/ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1") == $userIp ]]
   then
     echo -e '\n\n'
     echo -e ${RED}
@@ -79,7 +88,7 @@ else
     echo -e ${CLEAR}
   else
     read -p 'Descrption: ' userDec
-    sqlite3 ipam.db  "insert into ipam (host , ip , dec) values ('$2','$userIp','$userDec'); ";
+    sqlite3 $MAIN_DIR/ipam.db  "insert into ipam (host , ip , dec) values ('$2','$userIp','$userDec'); ";
     echo -e '\n\n'
     echo -e ${GREEN}
     echo "Your ip added in database"
@@ -99,21 +108,21 @@ else
   read -p 'ID NUMBER: ' IPID
   echo -e ${RED}
   echo
-  sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' AND id='$IPID' "
+  sqlite3 $MAIN_DIR/ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' AND id='$IPID' "
   echo
   read -p 'Are you sure? y or n: ' CONFIRM
   echo
   if [[ $CONFIRM == 'y'  ]]
   then
     echo -e ${CLEAR}
-    sqlite3 ipam.db  "DELETE FROM ipam WHERE id LIKE '%$IPID%'; ";
+    sqlite3 $MAIN_DIR/ipam.db  "DELETE FROM ipam WHERE id LIKE '%$IPID%'; ";
     echo -e ${GREEN}
     echo "Your ip deleted from database."
     printf ${CLEAR}
 
   else
     echo -e ${CLEAR}
-    sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
+    sqlite3 $MAIN_DIR/ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
   fi
   
 fi
