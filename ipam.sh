@@ -52,7 +52,6 @@ then
   sqlite3 ipam.db ".mode column" "select * from ipam;"
 
 else
-  echo $2
   sqlite3 ipam.db ".mode column"  "SELECT  * from ipam WHERE host='$2' ";
 fi
 
@@ -72,7 +71,7 @@ then
 else
   read -p 'IP: ' userIp
   #sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1"
-  if [ $(sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1") == $userIp ]
+  if [[ $(sqlite3 ipam.db "SELECT  ip from ipam WHERE host='$2' AND IP='$userIp' limit 1") == $userIp ]]
   then
     echo -e '\n\n'
     echo -e ${RED}

@@ -8,5 +8,10 @@ if you dont have permision run
 ```
 chmod +x ipam.sh
 ```
+and then you should init the db with
+```
+./ipam.sh init
+``` 
+if database file (ipam.db) is not available that create ipam.db file 
 
 # example image
