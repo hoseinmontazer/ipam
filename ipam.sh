@@ -21,6 +21,9 @@ usage() {
 	printf "show             show\n"
 	printf "insert           insert new ip\n"
   printf "del              delete  ip\n"
+  printf "repo init        git init\n"
+  printf "repo pull        git pull\n"
+  printf "repo push        git push\n"
   printf "help             show this help\n"
 	printf ${CLEAR}
 }
@@ -129,6 +132,58 @@ fi
 }
 
 
+repo() {
+
+if [ -z $2 ]
+then
+  #echo -e '\n\n'
+  echo -e ${RED}
+  echo "please use git init-pull-push"
+  echo -e ${CLEAR}
+
+else
+  if [[ $2 == 'pull' ]]
+  then
+    echo -e '\n\n'
+    echo -e ${GREEN}
+    git -C /$MAIN_DIR/ pull
+    echo -e ${CLEAR}
+  elif [[ $2 == 'push' ]]
+  then
+    #echo -e '\n\n'
+    echo -e ${YELLOW}
+    git -C /$MAIN_DIR/ add  .
+    read -p 'commit message: ' MSG
+    git -C $MAIN_DIR/ commit -m "$MSG"
+    echo -e ${GREEN}
+    git -C $MAIN_DIR/ push --set-upstream origin master -ff
+    printf ${CLEAR}
+  elif [[ $2 == 'init' ]]
+  then
+    #echo -e '\n'
+    echo -e ${YELLOW}
+    #echo "init"
+    #cd  $MAIN_DIR
+    #pwd
+    git init $MAIN_DIR
+    touch $MAIN_DIR/.gitignore
+    #git -C $MAIN_DIR/ add  .
+    `git -C /$MAIN_DIR/ add  .`
+    #echo hi
+    git -C $MAIN_DIR/ commit -m "initial commit"
+    read -p 'remote: ' REMOTE
+    echo $REMOTE
+    git -C $MAIN_DIR/ remote add origin $REMOTE
+    printf ${CLEAR}
+  fi
+  # else
+  #   echo -e '\n\n'
+  #   echo -e ${GREEN}
+  #   echo "somthing wrong"
+  #   printf ${CLEAR}
+  # fi
+fi
+}
 
 
 
@@ -160,4 +215,7 @@ case $1 in
     ;;
     "del" )
     del $1 $2
+    ;;
+    "repo" )
+    repo $1 $2
 esac
